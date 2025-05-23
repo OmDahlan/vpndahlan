@@ -1,0 +1,129 @@
+mixed-port: 7890
+allow-lan: true
+mode: rule
+log-level: warning
+dns:
+  enable: true
+  listen: 0.0.0.0:53
+  ipv6: false
+  nameserver:
+  - 1.1.1.1
+  - 8.8.8.8
+  - 9.9.9.9
+  fallback:
+  - 1.0.0.1
+  - 8.8.4.4
+  - 9.9.9.10
+proxies:
+- name: '[Alan] VLESS - gRPC'
+  type: vless
+  server: img.email3.vidio.com
+  port: 443
+  uuid: eef3c923-dc59-4104-9357-c62f62847fd0
+  network: grpc
+  tls: true
+  skip-cert-verify: true
+  servername: ardh2.aixxycode.id
+  grpc-opts:
+    grpc-service-name: vless-service
+    idle_timeout: 15s
+    permit_without_stream: false
+    multiplex: true
+  udp: true
+  client-fingerprint: randomized
+- name: '[Alan] VLESS - WS'
+  type: vless
+  server: img.email3.vidio.com
+  port: 443
+  uuid: eef3c923-dc59-4104-9357-c62f62847fd0
+  network: ws
+  tls: true
+  skip-cert-verify: true
+  servername: ardh2.aixxycode.id
+  ws-opts:
+    path: /vless
+    headers:
+      Host: ardh2.aixxycode.id
+      User-Agent: ClashMeta
+  udp: true
+  client-fingerprint: randomized
+- name: dahlannn
+  type: trojan
+  server: img.email3.vidio.com
+  port: 443
+  password: 7a8e2c6c-d125-46c0-a0af-c01b2b177f86
+  sni: sg-gd.wc-webkuy.web.id
+  skip-cert-verify: false
+  network: ws
+  ws-opts:
+    path: /trojan
+    headers:
+      Host: sg-gd.wc-webkuy.web.id
+- name: sggoddy
+  type: trojan
+  server: img.email3.vidio.com
+  port: 443
+  password: 7a8e2c6c-d125-46c0-a0af-c01b2b177f86
+  sni: sg-gd.wc-webkuy.web.id
+  skip-cert-verify: true
+  network: ws
+  ws-opts:
+    path: /trojan
+    headers:
+      Host: sg-gd.wc-webkuy.web.id
+- name: ca.safecdn.site
+  type: trojan
+  server: img.email3.vidio.com
+  port: 443
+  password: 4523966e-73e9-4632-83ce-956fe190a7df
+  sni: ca.safecdn.site
+  skip-cert-verify: true
+  network: ws
+  ws-opts:
+    path: /
+    headers:
+      Host: ca.safecdn.site
+- name: gb.safecdn.site
+  type: trojan
+  server: img.email3.vidio.com
+  port: 443
+  password: 5ff8cb7e-3b90-4407-8d70-b877acb56dd4
+  sni: gb.safecdn.site
+  skip-cert-verify: true
+  network: ws
+  ws-opts:
+    path: /
+    headers:
+      Host: gb.safecdn.site
+proxy-groups:
+- name: VLESS-LoadBalance
+  type: url-test
+  strategy: round-robin
+  url: http://cp.cloudflare.com/generate_204
+  interval: 300
+  proxies:
+  - '[Alan] VLESS - gRPC'
+  - '[Alan] VLESS - WS'
+  tolerance: 50
+- name: Auto
+  type: select
+  proxies:
+  - dahlannn
+- name: Fastest
+  type: url-test
+  proxies:
+  - '[Alan] VLESS - gRPC'
+  - '[Alan] VLESS - WS'
+  - dahlannn
+  - sggoddy
+  - ca.safecdn.site
+  - gb.safecdn.site
+  url: http://www.gstatic.com/generate_204
+  interval: 300
+rules:
+- MATCH, VLESS-LoadBalance
+- MATCH,Auto
+- MATCH,Fastest
+socks-port: 0
+tun:
+  enable: false
